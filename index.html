@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Results - API Demo</title>
+    <meta name="description" content="Learn how to use APIs by fetching live football results">
+
+    <!-- Link to our CSS file for styling -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Google Fonts for better typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <!-- Main container for our app -->
+    <div class="container">
+
+        <!-- Header section -->
+        <header class="header">
+            <h1>⚽ Football Fixtures Tracker</h1>
+            <p class="subtitle">Track upcoming matches from Europe's top leagues</p>
+        </header>
+
+        <!-- API Usage Counter -->
+        <div class="api-counter" id="api-counter">
+            <div class="counter-header">
+                <span class="counter-title">
+                    📊 API Usage Today
+                    <span class="info-icon"
+                        title="ℹ️ API Counter Help&#10;&#10;• Daily Limit: 100 API calls&#10;• Each button click uses 6 calls (1 per league)&#10;• Counter resets at midnight&#10;• Saved in your browser&#10;&#10;💡 Tips for Efficiency:&#10;• Uncheck leagues you don't need&#10;• Results stay on screen - no need to refresh&#10;• Plan your queries to stay under the limit">ℹ️</span>
+                </span>
+                <span class="counter-reset" id="reset-timer">Resets in --:--</span>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="counter-stats">
+                <span class="counter-used" id="counter-used">-- / 100 calls</span>
+                <span class="counter-remaining" id="counter-remaining">-- remaining</span>
+            </div>
+            <div class="counter-warning hidden" id="counter-warning">
+                ⚠️ <span id="warning-text">Approaching daily limit!</span>
+            </div>
+        </div>
+
+        <!-- Tabs Navigation -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="tab-fixtures">📅 Upcoming Fixtures</button>
+            <button class="tab-btn" data-tab="tab-leagues">🌍 Browse Leagues</button>
+        </div>
+
+        <!-- TAB 1: Fixtures (Existing Functionality) -->
+        <div id="tab-fixtures" class="tab-content active">
+
+            <!-- Control panel for fetching upcoming fixtures -->
+            <div class="control-panel">
+                <h2>Upcoming Fixtures</h2>
+                <p class="control-description">Select leagues and fetch upcoming fixtures</p>
+
+                <!-- League Selection -->
+                <div class="league-selector">
+                    <h3>Select Leagues:</h3>
+                    <div class="league-options">
+                        <label class="league-option">
+                            <input type="checkbox" value="39" data-name="Premier League" checked>
+                            <span>Premier League</span>
+                        </label>
+                        <label class="league-option">
+                            <input type="checkbox" value="140" data-name="La Liga" checked>
+                            <span>La Liga</span>
+                        </label>
+                        <label class="league-option">
+                            <input type="checkbox" value="135" data-name="Serie A" checked>
+                            <span>Serie A</span>
+                        </label>
+                        <label class="league-option">
+                            <input type="checkbox" value="78" data-name="Bundesliga" checked>
+                            <span>Bundesliga</span>
+                        </label>
+                        <label class="league-option">
+                            <input type="checkbox" value="61" data-name="Ligue 1" checked>
+                            <span>Ligue 1</span>
+                        </label>
+                        <label class="league-option">
+                            <input type="checkbox" value="2" data-name="Champions League" checked>
+                            <span>Champions League</span>
+                        </label>
+                        <label class="league-option">
+                            <input type="checkbox" value="71" data-name="Brazil Serie A" checked>
+                            <span>Brazil Serie A</span>
+                        </label>
+                        <label class="league-option">
+                            <input type="checkbox" value="45" data-name="FA Cup" checked>
+                            <span>FA Cup</span>
+                        </label>
+                        <label class="league-option">
+                            <input type="checkbox" value="1" data-name="World Cup" data-season="2026" checked>
+                            <span>World Cup</span>
+                        </label>
+                        <label class="league-option">
+                            <input type="checkbox" value="3" data-name="Europa League" checked>
+                            <span>Europa League</span>
+                        </label>
+                        <label class="league-option">
+                            <input type="checkbox" value="848" data-name="Conference League" checked>
+                            <span>Conference League</span>
+                        </label>
+                        <label class="league-option">
+                            <input type="checkbox" value="262" data-name="Liga MX" data-season="2025" checked>
+                            <span>Liga MX</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Button to fetch upcoming fixtures -->
+                <button id="fetch-btn" class="fetch-btn">
+                    <span class="btn-text">Get Upcoming Fixtures</span>
+                    <span class="btn-icon">⚽</span>
+                </button>
+
+                <!-- Date Range Selection -->
+                <div class="date-selector">
+                    <hr class="divider">
+                    <h3>Or Select Date Range:</h3>
+                    <div class="date-inputs">
+                        <div class="date-group">
+                            <label for="start-date">From:</label>
+                            <input type="date" id="start-date" class="date-input">
+                        </div>
+                        <div class="date-group">
+                            <label for="end-date">To:</label>
+                            <input type="date" id="end-date" class="date-input">
+                        </div>
+                    </div>
+                    <button id="fetch-date-btn" class="fetch-btn secondary-btn">
+                        <span class="btn-text">Get Fixtures by Date</span>
+                        <span class="btn-icon">📅</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Loading spinner (hidden by default) -->
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Fetching football data...</p>
+            </div>
+
+            <!-- Error message area (hidden by default) -->
+            <div id="error" class="error-message hidden">
+                <h3>⚠️ Oops! Something went wrong</h3>
+                <p id="error-text"></p>
+            </div>
+
+            <!-- Results container where matches will be displayed -->
+            <div id="results" class="results-container">
+                <!-- Match table will be inserted here by JavaScript -->
+            </div>
+        </div><!-- End of tab-fixtures -->
+
+        <!-- TAB 2: League Discovery -->
+        <div id="tab-leagues" class="tab-content hidden">
+            <div class="control-panel">
+                <h2>Explore Football Leagues</h2>
+                <p class="control-description">Discover competitions from around the world. (Cached locally to save
+                    credits!)</p>
+
+                <div class="search-box">
+                    <input type="text" id="league-search"
+                        placeholder="Search leagues (e.g. 'Premier', 'Spain', 'cup')..." disabled>
+                </div>
+
+                <div class="action-row">
+                    <button id="fetch-leagues-btn" class="fetch-btn">
+                        <span class="btn-text">Load All Leagues</span>
+                        <span class="btn-icon">📥</span>
+                    </button>
+                    <span id="league-status" class="status-text"></span>
+                </div>
+            </div>
+
+            <div id="leagues-container" class="leagues-grid">
+                <!-- League cards will go here -->
+                <div class="placeholder-message">
+                    Click "Load All Leagues" to fetch the available competitions.
+                </div>
+            </div>
+        </div>
+        <footer class="footer">
+            <h3>📚 Want to Learn More?</h3>
+            <p>Check out <strong>README.md</strong> and <strong>API-LEARNING-GUIDE.md</strong> for detailed
+                explanations!</p>
+        </footer>
+    </div>
+
+    <!-- Load Historical Odds Data (Global Variable) -->
+    <script src="odds_data.js"></script>
+
+    <!-- Link to our JavaScript file (loaded at the end so HTML loads first) -->
+    <script src="script.js"></script>
+</body>
+
+</html>

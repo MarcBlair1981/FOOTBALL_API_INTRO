@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Available Seasons - API Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #60a5fa;
+        }
+
+        button {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        #results {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .league-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 8px;
+        }
+
+        .league-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #60a5fa;
+            margin-bottom: 10px;
+        }
+
+        .seasons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .season {
+            background: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .current-season {
+            background: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+            font-weight: 600;
+        }
+
+        .loading {
+            color: #94a3b8;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 Check Available Seasons</h1>
+    <p>This tool checks which seasons are available for each of the Top European leagues in the API.</p>
+
+    <button onclick="checkSeasons()">Check Available Seasons</button>
+
+    <div id="results"></div>
+
+    <script>
+        const API_KEY = 'df8b404f81fb689192c28b65c73e8ec1';
+        const API_BASE_URL = 'https://v3.football.api-sports.io';
+
+        const LEAGUES = [
+            { id: 39, name: 'Premier League 🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+            { id: 140, name: 'La Liga 🇪🇸' },
+            { id: 135, name: 'Serie A 🇮🇹' },
+            { id: 78, name: 'Bundesliga 🇩🇪' },
+            { id: 61, name: 'Ligue 1 🇫🇷' },
+            { id: 2, name: 'Champions League 🏆' }
+        ];
+
+        async function checkSeasons() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p class="loading">Checking seasons... This will use 6 API calls.</p>';
+
+            let html = '';
+
+            for (const league of LEAGUES) {
+                try {
+                    // The /leagues endpoint with the league ID returns available seasons
+                    const url = `${API_BASE_URL}/leagues?id=${league.id}`;
+
+                    const response = await fetch(url, {
+                        headers: {
+                            'x-apisports-key': API_KEY
+                        }
+                    });
+
+                    if (!response.ok) {
+                        html += `<div class="league-section">
+                            <div class="league-name">${league.name}</div>
+                            <p style="color: #fca5a5;">Error: ${response.status}</p>
+                        </div>`;
+                        continue;
+                    }
+
+                    const data = await response.json();
+
+                    if (data.response && data.response.length > 0) {
+                        const seasons = data.response[0].seasons;
+
+                        html += `<div class="league-section">
+                            <div class="league-name">${league.name}</div>
+                            <div class="seasons">`;
+
+                        // Sort seasons in descending order (newest first)
+                        seasons.sort((a, b) => b.year - a.year);
+
+                        seasons.forEach(season => {
+                            const isCurrent = season.current;
+                            const seasonClass = isCurrent ? 'season current-season' : 'season';
+                            const currentLabel = isCurrent ? ' (CURRENT)' : '';
+                            html += `<span class="${seasonClass}">${season.year}${currentLabel}</span>`;
+                        });
+
+                        html += `</div></div>`;
+                    }
+
+                } catch (error) {
+                    html += `<div class="league-section">
+                        <div class="league-name">${league.name}</div>
+                        <p style="color: #fca5a5;">Error: ${error.message}</p>
+                    </div>`;
+                }
+            }
+
+            resultsDiv.innerHTML = html;
+        }
+    </script>
+</body>
+
+</html>

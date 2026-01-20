@@ -623,7 +623,7 @@ body {
 }
 
 /* ===================================
-   LEAGUE DISCOVERY STYLES
+   LEAGUE DISCOVERY STYLES (DARK MODE)
    =================================== */
 .search-box {
     margin-bottom: 1.5rem;
@@ -636,16 +636,23 @@ body {
     width: 100%;
     padding: 1rem;
     font-size: 1rem;
-    border: 1px solid #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
-    background-color: white;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    background-color: rgba(30, 41, 59, 0.6);
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s;
 }
 
 .search-box input:focus {
     outline: none;
-    border-color: var(--primary-color);
+    border-color: #60a5fa;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    background-color: rgba(30, 41, 59, 0.8);
+}
+
+.search-box input::placeholder {
+    color: #64748b;
 }
 
 .action-row {
@@ -658,7 +665,7 @@ body {
 
 .status-text {
     font-size: 0.9rem;
-    color: #64748b;
+    color: #94a3b8;
 }
 
 .leagues-grid {
@@ -668,28 +675,30 @@ body {
     padding: 1rem 0;
 }
 
+/* Dark Mode League Card */
 .league-card {
-    background: white;
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
     padding: 1rem;
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    border: 1px solid #e2e8f0;
+    border: 1px solid rgba(255, 255, 255, 0.05);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
 .league-card:hover {
-    background-color: #f8fafc;
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(4px);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .league-card.major-league {
-    border-left: 4px solid var(--secondary-color);
-    background: #fdfdfd; 
+    border-left: 4px solid #f59e0b; /* Amber/Gold for major leagues */
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.05) 0%, rgba(255, 255, 255, 0.03) 100%);
 }
 
-/* New Layout for List Items */
+/* Layout for List Items */
 .league-info {
     flex-grow: 1;
     display: grid;
@@ -701,13 +710,13 @@ body {
 .league-info h4 {
     margin: 0;
     font-size: 1rem;
-    color: #0f172a;
+    color: #f1f5f9;
     font-weight: 600;
 }
 
 .league-info p {
     margin: 0;
-    color: #64748b;
+    color: #94a3b8;
     font-size: 0.9rem;
 }
 
@@ -721,23 +730,24 @@ body {
     font-size: 0.75rem;
     padding: 0.2rem 0.6rem;
     border-radius: 4px;
-    background-color: #f1f5f9;
-    color: #475569;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
     white-space: nowrap;
 }
 
 .tag-popular {
-    background-color: var(--secondary-color);
-    color: white;
+    background-color: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .placeholder-message {
     text-align: center;
     padding: 3rem;
     color: #94a3b8;
-    background: #f8fafc;
+    background: rgba(255, 255, 255, 0.02);
     border-radius: 12px;
-    border: 2px dashed #e2e8f0;
+    border: 2px dashed rgba(255, 255, 255, 0.1);
 }
 
 /* Load More Button */
@@ -747,16 +757,86 @@ body {
     width: 100%;
 }
 .load-more-btn {
-    background: white;
-    border: 1px solid #e2e8f0;
-    padding: 0.5rem 2rem;
-    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 0.9rem;
-    color: #64748b;
+    color: #cbd5e1;
     transition: all 0.2s;
 }
 .load-more-btn:hover {
-    border-color: #cbd5e1;
-    color: #334155;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* ===================================
+   PINNING & CUSTOM LEAGUES STYLES
+   =================================== */
+/* Pin Button in Card */
+.pin-league-btn {
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+    color: #e2e8f0;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 10px;
+}
+
+.pin-league-btn:hover {
+    background: rgba(59, 130, 246, 0.2);
+    border-color: rgba(59, 130, 246, 0.5);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.pin-league-btn.pinned {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #6ee7b7;
+}
+
+/* Custom Leagues Container and Items */
+#custom-leagues-container {
+    display: contents; /* Allows children to sit directly in grid */
+}
+
+.league-option.custom-league {
+    border: 1px dashed rgba(139, 92, 246, 0.4);
+    background: rgba(139, 92, 246, 0.05);
+}
+
+.league-option.custom-league:hover {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: rgba(139, 92, 246, 0.6);
+}
+
+.custom-league span {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.remove-pin {
+    opacity: 0.4;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.remove-pin:hover {
+    opacity: 1;
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
 }

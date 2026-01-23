@@ -166,6 +166,9 @@ function updateResetTimer() {
 // ===================================
 // STEP 4: MAIN FUNCTION TO FETCH DATA
 // ===================================
+// ===================================
+// STEP 4: MAIN FUNCTION TO FETCH DATA
+// ===================================
 async function fetchFootballData() {
     // Get selected leagues
     const selectedCheckboxes = document.querySelectorAll('.league-option input[type="checkbox"]:checked');
@@ -198,11 +201,12 @@ async function fetchFootballData() {
 
         // Loop through each selected league (EFFICIENT: only fetch what user wants)
         for (const league of selectedLeagues) {
-            console.log(`📡 Fetching from ${league.name}...`);
+            console.log(`📡 Fetching from ${league.name} (ID: ${league.id})...`);
 
             // Build the URL for upcoming fixtures (next=10 means next 10 matches)
             const season = league.season || CURRENT_SEASON;
             const url = `${API_BASE_URL}/fixtures?league=${league.id}&season=${season}&next=10`;
+            console.log(`Requesting: ${url}`);
 
             // Make the API request
             const response = await fetch(url, {
@@ -211,6 +215,8 @@ async function fetchFootballData() {
                     'x-apisports-key': API_KEY
                 }
             });
+
+            console.log(`Response status: ${response.status}`);
 
             // Track API call
             incrementApiUsage(1);
@@ -229,6 +235,7 @@ async function fetchFootballData() {
 
             // Parse the JSON response
             const data = await response.json();
+            console.log(`Data received. Fixtures: ${data.response ? data.response.length : 0}`);
 
             // Add the fixtures to our collection
             if (data.response && data.response.length > 0) {
@@ -260,6 +267,7 @@ async function fetchFootballData() {
 
         // Display the results
         displayMatches(next10Fixtures);
+        console.log('Matches displayed successfully');
 
     } catch (error) {
         // If anything goes wrong, show an error message
@@ -948,3 +956,4 @@ function enableSearch() {
         // Check local storage for selection usage again to ensuring checked state is remembered correctly?
         // Actually, new items default to checked in the HTML above.
     }
+}

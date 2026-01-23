@@ -866,94 +866,94 @@ function renderNextBatch() {
 
 function enableSearch() {
     leagueSearchInput.disabled = false;
+}
 
-    // ===================================
-    // CUSTOM LEAGUE PINNING LOGIC
-    // ===================================
-    function loadCustomLeagues() {
-        const saved = localStorage.getItem('myCustomLeagues');
-        if (saved) {
-            customLeagues = JSON.parse(saved);
-            renderCustomLeagues();
-        }
-    }
-
-    function saveCustomLeagues() {
-        localStorage.setItem('myCustomLeagues', JSON.stringify(customLeagues));
+// ===================================
+// CUSTOM LEAGUE PINNING LOGIC
+// ===================================
+function loadCustomLeagues() {
+    const saved = localStorage.getItem('myCustomLeagues');
+    if (saved) {
+        customLeagues = JSON.parse(saved);
         renderCustomLeagues();
     }
+}
 
-    function isLeaguePinned(id) {
-        // Check if it's in our custom list OR in the hardcoded HTML list (optional, but good for UI state)
-        // For this specific 'pin' feature, we mainly care if it's in the custom list or if it's a default one.
-        // However, users can't 'unpin' default hardcoded ones easily without editing HTML, 
-        // so let's focus on the custom list for the button state.
-        return customLeagues.some(l => l.id === id);
+function saveCustomLeagues() {
+    localStorage.setItem('myCustomLeagues', JSON.stringify(customLeagues));
+    renderCustomLeagues();
+}
+
+function isLeaguePinned(id) {
+    // Check if it's in our custom list OR in the hardcoded HTML list (optional, but good for UI state)
+    // For this specific 'pin' feature, we mainly care if it's in the custom list or if it's a default one.
+    // However, users can't 'unpin' default hardcoded ones easily without editing HTML, 
+    // so let's focus on the custom list for the button state.
+    return customLeagues.some(l => l.id === id);
+}
+
+// Global function to be called from the HTML inline onclick
+window.toggleLeaguePin = function (id, name, season) {
+    const existingIndex = customLeagues.findIndex(l => l.id === id);
+
+    if (existingIndex >= 0) {
+        // Remove it
+        customLeagues.splice(existingIndex, 1);
+        saveCustomLeagues();
+
+        // Update button visual
+        updatePinButton(id, false);
+    } else {
+        // Add it
+        customLeagues.push({ id, name, season });
+        saveCustomLeagues();
+
+        // Update button visual
+        updatePinButton(id, true);
     }
+};
 
-    // Global function to be called from the HTML inline onclick
-    window.toggleLeaguePin = function (id, name, season) {
-        const existingIndex = customLeagues.findIndex(l => l.id === id);
-
-        if (existingIndex >= 0) {
-            // Remove it
-            customLeagues.splice(existingIndex, 1);
-            saveCustomLeagues();
-
-            // Update button visual
-            updatePinButton(id, false);
-        } else {
-            // Add it
-            customLeagues.push({ id, name, season });
-            saveCustomLeagues();
-
-            // Update button visual
-            updatePinButton(id, true);
-        }
-    };
-
-    function updatePinButton(id, isPinned) {
-        // Find inputs in the DOM with this onclick handler or ID lookups... 
-        // Since we re-render the list, we might just want to refresh the view or targeted update.
-        // However, finding the specific button in the grid is easiest by re-rendering 
-        // OR we can do a targeted query if we had IDs on the cards.
-        // Let's just do a quick targeted update if the card exists.
-        const buttons = document.querySelectorAll('.pin-league-btn');
-        buttons.forEach(btn => {
-            // This is a bit hacky, checking the onclick string, but it works for a simple app without state framework
-            if (btn.getAttribute('onclick').includes(`(${id},`)) {
-                if (isPinned) {
-                    btn.innerHTML = '✅ Pinned';
-                    btn.classList.add('pinned');
-                } else {
-                    btn.innerHTML = '➕ Pin to Dashboard';
-                    btn.classList.remove('pinned');
-                }
+function updatePinButton(id, isPinned) {
+    // Find inputs in the DOM with this onclick handler or ID lookups... 
+    // Since we re-render the list, we might just want to refresh the view or targeted update.
+    // However, finding the specific button in the grid is easiest by re-rendering 
+    // OR we can do a targeted query if we had IDs on the cards.
+    // Let's just do a quick targeted update if the card exists.
+    const buttons = document.querySelectorAll('.pin-league-btn');
+    buttons.forEach(btn => {
+        // This is a bit hacky, checking the onclick string, but it works for a simple app without state framework
+        if (btn.getAttribute('onclick').includes(`(${id},`)) {
+            if (isPinned) {
+                btn.innerHTML = '✅ Pinned';
+                btn.classList.add('pinned');
+            } else {
+                btn.innerHTML = '➕ Pin to Dashboard';
+                btn.classList.remove('pinned');
             }
-        });
-
-        if (isPinned) {
-            // alert(`Added ${name} to your dashboard!`);
         }
+    });
+
+    if (isPinned) {
+        // alert(`Added ${name} to your dashboard!`);
     }
+}
 
-    function renderCustomLeagues() {
-        const container = document.getElementById('custom-leagues-container');
-        if (!container) return;
+function renderCustomLeagues() {
+    const container = document.getElementById('custom-leagues-container');
+    if (!container) return;
 
-        container.innerHTML = '';
+    container.innerHTML = '';
 
-        customLeagues.forEach(league => {
-            const label = document.createElement('label');
-            label.className = 'league-option custom-league';
-            label.innerHTML = `
-            <input type="checkbox" value="${league.id}" data-name="${league.name}" data-season="${league.season}" checked>
-            <span>${league.name} <span class="remove-pin" onclick="event.preventDefault(); toggleLeaguePin(${league.id})">❌</span></span>
-        `;
-            container.appendChild(label);
-        });
+    customLeagues.forEach(league => {
+        const label = document.createElement('label');
+        label.className = 'league-option custom-league';
+        label.innerHTML = `
+        <input type="checkbox" value="${league.id}" data-name="${league.name}" data-season="${league.season}" checked>
+        <span>${league.name} <span class="remove-pin" onclick="event.preventDefault(); toggleLeaguePin(${league.id})">❌</span></span>
+    `;
+        container.appendChild(label);
+    });
 
-        // Check local storage for selection usage again to ensuring checked state is remembered correctly?
-        // Actually, new items default to checked in the HTML above.
-    }
+    // Check local storage for selection usage again to ensuring checked state is remembered correctly?
+    // Actually, new items default to checked in the HTML above.
 }

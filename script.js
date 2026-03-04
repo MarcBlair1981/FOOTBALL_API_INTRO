@@ -203,9 +203,9 @@ async function fetchFootballData() {
         for (const league of selectedLeagues) {
             console.log(`📡 Fetching from ${league.name} (ID: ${league.id})...`);
 
-            // Build the URL for upcoming fixtures (next=10 means next 10 matches)
+            // Build the URL for upcoming fixtures (next=50 means next 50 matches)
             const season = league.season || CURRENT_SEASON;
-            const url = `${API_BASE_URL}/fixtures?league=${league.id}&season=${season}&next=10`;
+            const url = `${API_BASE_URL}/fixtures?league=${league.id}&season=${season}&next=50`;
             console.log(`Requesting: ${url}`);
 
             // Make the API request
@@ -254,7 +254,13 @@ async function fetchFootballData() {
             return new Date(a.fixture.date) - new Date(b.fixture.date);
         });
 
-        // Take only the first 10 upcoming fixtures
+        // ===================================
+        // FIXTURE CHANGE TRACKING LOGIC
+        // ===================================
+        const detectedChanges = compareAndSaveFixtures(allFixtures);
+        displayChanges(detectedChanges);
+
+        // Take only the first 10 upcoming fixtures for the main display
         const next10Fixtures = allFixtures.slice(0, 10);
 
         console.log(`📦 Showing next ${next10Fixtures.length} upcoming fixtures`);
@@ -585,6 +591,154 @@ function getHistoricalOdds(homeTeam, awayTeam) {
     console.log(`   ❌ No match found.`);
     return null;
 }
+
+// ===================================
+// FIXTURE CHANGE TRACKING (LOCAL STORAGE)
+// ===================================
+function compareAndSaveFixtures(newFixtures) {
+    // 1. Load previously saved fixtures
+    const savedData = localStorage.getItem('savedFixtures');
+    const oldFixtures = savedData ? JSON.parse(savedData) : {};
+
+    let changes = [];
+    let updatedStorage = { ...oldFixtures };
+
+    // 2. Compare new fixtures against old ones
+    newFixtures.forEach(match => {
+        const fixtureId = match.fixture.id;
+        const newDate = match.fixture.date;
+        const newStatus = match.fixture.status.short;
+
+        if (oldFixtures[fixtureId]) {
+            const oldMatch = oldFixtures[fixtureId];
+
+            // Check if date or status changed
+            if (oldMatch.date !== newDate || oldMatch.status !== newStatus) {
+                changes.push({
+                    match: match,
+                    oldDate: oldMatch.date,
+                    newDate: newDate,
+                    oldStatus: oldMatch.status,
+                    newStatus: newStatus
+                });
+            }
+        }
+
+        // 3. Update the tracking object with the latest info
+        updatedStorage[fixtureId] = {
+            date: newDate,
+            status: newStatus,
+            homeTeam: match.teams.home.name,
+            awayTeam: match.teams.away.name,
+            leagueId: match.league.id
+        };
+    });
+
+    // 4. Save the updated list back to Local Storage
+    localStorage.setItem('savedFixtures', JSON.stringify(updatedStorage));
+
+    return changes;
+}
+
+function displayChanges(changes) {
+    const changesTab = document.getElementById('changes-results');
+    const badge = document.getElementById('changes-badge');
+    const statusText = document.getElementById('changes-status-text');
+
+    // Update Badge
+    if (changes.length > 0) {
+        badge.textContent = changes.length;
+        badge.classList.remove('hidden');
+        statusText.textContent = `Found ${changes.length} change(s) since last check!`;
+        statusText.style.color = '#ef4444';
+    } else {
+        badge.classList.add('hidden');
+        statusText.textContent = 'No new changes detected.';
+        statusText.style.color = '#94a3b8';
+    }
+
+    // If no changes, keep placeholder
+    if (changes.length === 0) {
+        // Only show placeholder if we didn't just clear it manually
+        if (changesTab.innerHTML.trim() === '' || changesTab.innerHTML.includes('recently')) {
+            changesTab.innerHTML = `
+                <div class="placeholder-message">
+                    No schedule changes detected recently. Fetch upcoming fixtures to check for new updates.
+                </div>`;
+        }
+        return;
+    }
+
+    // Build Table for Changes
+    let html = `
+        <table class="fixtures-table">
+            <thead>
+                <tr>
+                    <th>Alert Type</th>
+                    <th>Match</th>
+                    <th>Schedule Update</th>
+                    <th class="center">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    changes.forEach(change => {
+        const match = change.match;
+        const leagueInfo = match.leagueInfo || { name: match.league.name };
+
+        // Format Dates
+        const formatTime = (isoString) => {
+            return new Date(isoString).toLocaleString('en-GB', {
+                weekday: 'short', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London'
+            });
+        };
+
+        const oldTimeFormatted = formatTime(change.oldDate);
+        const newTimeFormatted = formatTime(change.newDate);
+
+        let alertType = '⏱️ Time Change';
+        if (change.newStatus === 'PST' || change.newStatus === 'CANC') {
+            alertType = '🛑 Postponed/Canceled';
+        }
+
+        html += `
+            <tr>
+                <td style="color: #ef4444; font-weight: bold;">${alertType}</td>
+                <td>
+                    <div style="font-size: 0.85rem; color: #60a5fa; margin-bottom: 4px;">${leagueInfo.name}</div>
+                    <strong>${match.teams.home.name}</strong> vs <strong>${match.teams.away.name}</strong>
+                </td>
+                <td>
+                    <div class="old-time">Was: ${oldTimeFormatted}</div>
+                    <div class="new-time">Now: ${newTimeFormatted}</div>
+                </td>
+                <td class="center">
+                    <span class="match-status status-scheduled">${change.newStatus}</span>
+                </td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table>`;
+    changesTab.innerHTML = html;
+}
+
+// Add event listener for the Clear Alerts button
+document.addEventListener('DOMContentLoaded', () => {
+    const clearBtn = document.getElementById('clear-changes-btn');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            document.getElementById('changes-results').innerHTML = `
+                <div class="placeholder-message">
+                    Alerts cleared. Fetch upcoming fixtures to check for new updates.
+                </div>`;
+            document.getElementById('changes-badge').classList.add('hidden');
+            document.getElementById('changes-status-text').textContent = '';
+        });
+    }
+});
 
 // ===================================
 // HELPER FUNCTIONS

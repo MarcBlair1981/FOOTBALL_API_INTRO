@@ -49,6 +49,11 @@
         <!-- Tabs Navigation -->
         <div class="tabs">
             <button class="tab-btn active" data-tab="tab-fixtures">📅 Upcoming Fixtures</button>
+            <button class="tab-btn" data-tab="tab-changes">
+                ⚠️ Changes
+                <span id="changes-badge" class="badge hidden">0</span>
+            </button>
+            <button class="tab-btn" data-tab="tab-instructions">📖 How Alerts Work</button>
             <button class="tab-btn" data-tab="tab-leagues">🌍 Browse Leagues</button>
         </div>
 
@@ -108,7 +113,7 @@
                             <input type="checkbox" value="848" data-name="Conference League" checked>
                             <span>Conference League</span>
                         </label>
-                    <label class="league-option">
+                        <label class="league-option">
                             <input type="checkbox" value="262" data-name="Liga MX" data-season="2025" checked>
                             <span>Liga MX</span>
                         </label>
@@ -117,10 +122,11 @@
                             <span>Eredivisie</span>
                         </label>
                         <label class="league-option">
-                            <input type="checkbox" value="144" data-name="Jupiler Pro League" data-season="2025" checked>
+                            <input type="checkbox" value="144" data-name="Jupiler Pro League" data-season="2025"
+                                checked>
                             <span>Jupiler Pro League</span>
                         </label>
-                        
+
                         <!-- Custom Leagues (Pinned by User) -->
                         <div id="custom-leagues-container"></div>
                     </div>
@@ -170,6 +176,74 @@
                 <!-- Match table will be inserted here by JavaScript -->
             </div>
         </div><!-- End of tab-fixtures -->
+
+        <!-- TAB 1.5: Changes / Alerts -->
+        <div id="tab-changes" class="tab-content hidden">
+            <div class="control-panel">
+                <h2>Fixture Changes & Alerts</h2>
+                <p class="control-description">Matches that have been rescheduled, postponed, or changed time since you
+                    last checked.</p>
+                <div class="action-row" style="flex-direction: row; justify-content: flex-start; margin-bottom: 0;">
+                    <button id="clear-changes-btn" class="fetch-btn" style="width: auto; padding: 10px 20px;">
+                        <span class="btn-text">Clear Alerts</span>
+                        <span class="btn-icon">✓</span>
+                    </button>
+                    <span id="changes-status-text" class="status-text" style="align-self: center;"></span>
+                </div>
+            </div>
+
+            <div id="changes-results" class="results-container">
+                <div class="placeholder-message">
+                    No schedule changes detected recently. Fetch upcoming fixtures to check for new updates.
+                </div>
+            </div>
+        </div><!-- End of tab-changes -->
+
+        <!-- TAB 1.75: Instructions -->
+        <div id="tab-instructions" class="tab-content hidden">
+            <div class="control-panel">
+                <h2>How Fixture Alerts Work</h2>
+                <p class="control-description">Learn how to easily track schedule changes without wasting API credits.
+                </p>
+
+                <div
+                    style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-top: 20px; line-height: 1.6; color: #e2e8f0;">
+                    <h3 style="color: #60a5fa; margin-bottom: 15px;">Step 1: Set Your Baseline</h3>
+                    <p style="margin-bottom: 15px;">When you select your leagues and click <strong>"Get Upcoming
+                            Fixtures"</strong>, the app asks the API for the next 50 matches for those leagues.</p>
+                    <p style="margin-bottom: 25px;">It displays the next 10 matches on your screen, but it quietly saves
+                        all 50 matches into your browser's "Local Storage". This forms your baseline schedule.</p>
+
+                    <h3 style="color: #60a5fa; margin-bottom: 15px;">Step 2: Check for Updates</h3>
+                    <p style="margin-bottom: 15px;">Later in the week (or the next day), come back to the app and click
+                        <strong>"Get Upcoming Fixtures"</strong> again.</p>
+                    <p style="margin-bottom: 15px;">The app will fetch the live API data and immediately compare it
+                        against your saved baseline. If a match has been <strong>rescheduled</strong>,
+                        <strong>postponed</strong>, or <strong>canceled</strong>, it will flag it.</p>
+                    <p style="margin-bottom: 25px;">The new, updated schedule then replaces your old baseline in Local
+                        Storage, so you're always comparing against the most recent data.</p>
+
+                    <h3 style="color: #60a5fa; margin-bottom: 15px;">Step 3: Review the Changes Tab</h3>
+                    <p style="margin-bottom: 15px;">If the app detects any discrepancies between the old baseline and
+                        the new live data, a red notification badge will appear on the <strong>"⚠️ Changes"</strong>
+                        tab.</p>
+                    <p>Click the tab to view a table detailing exactly what changed (e.g., showing the old kick-off time
+                        crossed out next to the new kick-off time).</p>
+
+                    <hr style="border: 0; height: 1px; background: rgba(255,255,255,0.1); margin: 25px 0;">
+
+                    <h3 style="color: #fca5a5; margin-bottom: 10px;">⚠️ Important Notes</h3>
+                    <ul style="margin-left: 20px; margin-bottom: 10px; color: #cbd5e1;">
+                        <li style="margin-bottom: 8px;">Because this uses Local Storage, your saved baseline is tied to
+                            the specific browser and device you are currently using.</li>
+                        <li style="margin-bottom: 8px;">The app only checks for changes when you manually click <em>"Get
+                                Upcoming Fixtures"</em>. It does not check automatically in the background.</li>
+                        <li>It tracks the next 50 matches per league. Matches further out than that won't be tracked
+                            until they enter the next-50 window.</li>
+                    </ul>
+                </div>
+            </div>
+        </div><!-- End of tab-instructions -->
 
         <!-- TAB 2: League Discovery -->
         <div id="tab-leagues" class="tab-content hidden">
